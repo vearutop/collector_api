@@ -237,7 +237,7 @@ class ApiController extends Controller
      */
     public function promote(Request $request, $demote = false)
     {
-        file_put_contents('/tmp/hb.log', print_r($_REQUEST, 1), FILE_APPEND);
+        file_put_contents('/tmp/hb.log', file_get_contents('php://input'), FILE_APPEND);
 
 
         header("Content-Type: application/json");
