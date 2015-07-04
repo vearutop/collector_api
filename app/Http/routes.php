@@ -14,3 +14,12 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+
+Route::get('/api/promote', 'ApiController@promote');
+
+/*
+Route::get('/api/promote', function()
+{
+});
+*/

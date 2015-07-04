@@ -4,16 +4,15 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Tag extends Model
+class Issuer extends Model
 {
     /**
      * The database table used by the model.
      *
      * @var string
      */
-    protected $table = 'tags';
+    protected $table = 'issuers';
 
-    protected $fillable = array('name', 'issuer_id');
+    protected $fillable = array('name');
 
-    //
 }
