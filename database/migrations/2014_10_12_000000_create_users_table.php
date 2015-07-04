@@ -42,7 +42,7 @@ class CreateUsersTable extends Migration
         Schema::create('tags', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('issuer_id')->unsigned()->nullable();
-            $table->foreign('issuer_id')->references('id')->on('issuers');
+            //$table->foreign('issuer_id')->references('id')->on('issuers');
 
             $table->string('name');
             $table->timestamps();
@@ -69,7 +69,7 @@ class CreateUsersTable extends Migration
             $table->foreign('user_id')->references('id')->on('users');
 
             $table->integer('origin_user_id')->nullable()->unsigned();
-            $table->foreign('origin_user_id')->references('id')->on('users');
+            //$table->foreign('origin_user_id')->references('id')->on('users');
 
             $table->integer('tag_id')->unsigned();
             $table->foreign('tag_id')->references('id')->on('tags');
