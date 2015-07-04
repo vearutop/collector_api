@@ -243,7 +243,6 @@ class ApiController extends Controller
         $result = array();
         $result['status'] = 'ok';
 
-
         // array of records
         if (isset($_POST[0])) {
             return $this->batchPromote($_POST, $demote);
