@@ -200,6 +200,35 @@ class ApiController extends Controller
 
 
 
+    private function batchPromote($data, $demote = false) {
+        $result = array();
+        foreach ($data as $item) {
+            try {
+
+                $userLogin = isset($item['user']) ? $item['user'] : null;
+                $userType = isset($item['account_type']) ? $item['account_type'] : 'email';
+                $originUserLogin = isset($item['origin_user']) ? $item['origin_user'] : null;
+                $tagName = isset($item['tag']) ? $item['tag'] : null;
+                $points = isset($item['points']) ? $item['points'] : 1;
+                $points = $demote ? -abs($points) : abs($points);
+                $avatarUrl = isset($item['avatar_url']) ? $item['avatar_url'] : null;;
+
+                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl);
+                $res['status'] = 'ok';
+                $res['message'] = $this->getMessage();
+                $res['badges_issued'] = $this->userBadgesIssued;
+                $result []= $res;
+            }
+            catch (\Exception $e) {
+                $res['status'] = 'error';
+                $res['message'] = $e->getMessage();
+                $res['code'] = $e->getCode();
+                $result []= $res;
+            }
+        }
+
+        return json_encode($result);
+    }
 
     /**
      * Promote user for tag with points
@@ -212,6 +241,10 @@ class ApiController extends Controller
         $result = array();
         $result['status'] = 'ok';
 
+        // array of records
+        if (isset($_POST[0])) {
+            $this->batchPromote($_POST, $demote);
+        }
 
         try {
             $userLogin = $request->get('user');
