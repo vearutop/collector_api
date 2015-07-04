@@ -275,7 +275,7 @@ class ApiController extends Controller
 
         $text = explode(' ', $_REQUEST['text']);
         $points = (int)$text[0];
-        $userLogin = substr($text[1], 1);
+        $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
         $tagName = isset($text[2]) ? $text[2] : 'karma';
         $userType = 'slack';
         $issuerName = 'slack/' . $_REQUEST['team_domain'];
