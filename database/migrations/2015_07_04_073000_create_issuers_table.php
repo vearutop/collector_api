@@ -16,6 +16,8 @@ class CreateIssuersTable extends Migration
             $table->increments('id');
             $table->string('name');
             $table->unique('name');
+            $table->string('api_key');
+            $table->integer('owner_user_id');
             $table->timestamps();
         });
     }

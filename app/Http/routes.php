@@ -17,9 +17,4 @@ Route::get('/', function () {
 
 
 Route::get('/api/promote', 'ApiController@promote');
-
-/*
-Route::get('/api/promote', function()
-{
-});
-*/
+Route::get('/api/demote', 'ApiController@demote');

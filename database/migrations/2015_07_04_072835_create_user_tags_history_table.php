@@ -15,6 +15,7 @@ class CreateUserTagsHistoryTable extends Migration
         Schema::create('users_tags_history', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
+            $table->integer('origin_user_id');
             $table->integer('tag_id');
             $table->integer('points');
             $table->timestamps();

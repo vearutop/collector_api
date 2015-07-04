@@ -15,7 +15,7 @@ use Mockery\CountValidator\Exception;
 
 class ApiController extends Controller
 {
-    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points) {
+    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin) {
         if (!$userLogin) {
             throw new Exception('Undefined user');
         }
@@ -34,6 +34,12 @@ class ApiController extends Controller
 
 
         $user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
+        if ($originUserLogin) {
+            $originUser = User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin));
+        }
+        else {
+            $originUser = null;
+        }
         $issuer = Issuer::firstOrCreate(array('name' => $issuerName));
         $tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $issuer->id));
 
@@ -41,7 +47,12 @@ class ApiController extends Controller
         $userTag->points += $points;
         $userTag->save();
 
-        $userTagHistory = UserTagHistory::create(array('user_id' => $user->id, 'tag_id' => $tag->id, 'points' => $points));
+        UserTagHistory::create(array(
+            'user_id' => $user->id,
+            'tag_id' => $tag->id,
+            'points' => $points,
+            'origin_user_id' => $originUser ? $originUser->id : null,
+            ));
     }
 
 
@@ -50,7 +61,7 @@ class ApiController extends Controller
      *
      * @return Response
      */
-    public function promote(Request $request)
+    public function promote(Request $request, $demote = false)
     {
         header("Content-Type: application/json");
         $result = array();
@@ -60,11 +71,13 @@ class ApiController extends Controller
         try {
             $userLogin = $request->get('user');
             $userType = $request->get('account_type', 'email');
+            $originUserLogin = $request->get('origin_user');
             $tagName = $request->get('tag');
             $points = $request->get('points', 1);
+            $points = $demote ? -abs($points) : abs($points);
             $issuerName = $request->get('issuer');
 
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
         }
         catch (\Exception $e) {
             $result['status'] = 'error';
@@ -82,27 +95,7 @@ class ApiController extends Controller
      */
     public function demote(Request $request)
     {
-        header("Content-Type: application/json");
-        $result = array();
-        $result['status'] = 'ok';
-
-
-        try {
-            $userLogin = $request->get('user');
-            $userType = $request->get('account_type', 'email');
-            $tagName = $request->get('tag');
-            $points = -$request->get('points', 1);
-            $issuerName = $request->get('issuer');
-
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points);
-        }
-        catch (\Exception $e) {
-            $result['status'] = 'error';
-            $result['message'] = $e->getMessage();
-            $result['code'] = $e->getCode();
-        }
-
-        return json_encode($result);
+        return $this->promote($request, true);
     }
 
 }

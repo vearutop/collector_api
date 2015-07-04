@@ -13,6 +13,6 @@ class Issuer extends Model
      */
     protected $table = 'issuers';
 
-    protected $fillable = array('name');
+    protected $fillable = array('name', 'api_key', 'owner_user_id');
 
 }
