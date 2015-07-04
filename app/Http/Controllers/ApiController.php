@@ -298,9 +298,10 @@ class ApiController extends Controller
                         $this->slackResponse($text[1] . ' not found.');
                         return 'oops two';
                     }
-                    $user = User::find($userTag->user_id);
+                    $user = User::where('id', $userTag->user_id)->first();
                     if ($user) {
                         $this->slackResponse($user->name . ' is the top about ' . $tagText);
+                        return;
                     }
                     else {
                         return 'oops three';
