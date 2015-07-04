@@ -338,6 +338,15 @@ class ApiController extends Controller
                     $this->slackResponse($report);
                     return 'Thank you for curiosity. See you in the library.';
                 }
+
+                elseif ('help' === $text[0]) {
+                    return '`/hb +1 @username topic` to promote' . "\n"
+                    . '`/hb info @username` to get achievements' . "\n"
+                    . '`hb top topic` to get the master of topic';
+                }
+                else {
+                    throw new \Exception('Try `/hb help`');
+                }
             }
         }
         catch (\Exception $e) {
