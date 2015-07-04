@@ -78,7 +78,7 @@ class ApiController extends Controller
             $issuerName = $request->get('issuer');
             $avatarUrl = $request->get('avatar_url');
             
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl);
         }
         catch (\Exception $e) {
             $result['status'] = 'error';
@@ -123,7 +123,7 @@ class ApiController extends Controller
         $issuerName = 'slack/' . $_REQUEST['team_domain'];
 
         try {
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, '');
         }
         catch (\Exception $e) {
             return $e->getMessage();
