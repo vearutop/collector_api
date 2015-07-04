@@ -12,14 +12,6 @@ class CreateUserTagsHistoryTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_tags_history', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('origin_user_id')->nullable();
-            $table->integer('tag_id');
-            $table->integer('points');
-            $table->timestamps();
-        });
     }
 
     /**
@@ -29,6 +21,5 @@ class CreateUserTagsHistoryTable extends Migration
      */
     public function down()
     {
-        Schema::drop('users_tags_history');
     }
 }

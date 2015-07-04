@@ -12,14 +12,6 @@ class CreateIssuersTable extends Migration
      */
     public function up()
     {
-        Schema::create('issuers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->unique('name');
-            $table->string('api_key');
-            $table->integer('owner_user_id');
-            $table->timestamps();
-        });
     }
 
     /**
@@ -29,6 +21,5 @@ class CreateIssuersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('issuers');
     }
 }

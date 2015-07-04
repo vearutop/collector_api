@@ -12,14 +12,6 @@ class CreateUserTagsTable extends Migration
      */
     public function up()
     {
-        Schema::create('users_tags', function (Blueprint $table) {
-            $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('tag_id');
-            $table->unique(array('user_id', 'tag_id'));
-            $table->integer('points');
-            $table->timestamps();
-        });
     }
 
     /**
@@ -29,6 +21,5 @@ class CreateUserTagsTable extends Migration
      */
     public function down()
     {
-        Schema::drop('users_tags');
     }
 }
