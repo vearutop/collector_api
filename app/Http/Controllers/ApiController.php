@@ -311,9 +311,8 @@ class ApiController extends Controller
 
                 }
 
-                elseif ('@' === $text[0][0]) {
-                    $userName = substr($text[0], 1);
-                    $user = User::where('login', $userName)->where('type', $userType)->first();
+                elseif ('info' === $text[1]) {
+                    $user = User::where('login', $userLogin)->where('type', $userType)->first();
                     $userTags = UserTag::where('user_id', $user->id)->get();
                     $userBadges = UserBadge::where('user_id', $user->id)->get();
 
