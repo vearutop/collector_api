@@ -311,7 +311,7 @@ class ApiController extends Controller
 
                 }
 
-                elseif ('info' === $text[1]) {
+                elseif ('info' === $text[0]) {
                     $user = User::where('login', $userLogin)->where('type', $userType)->first();
                     $userTags = UserTag::where('user_id', $user->id)->get();
                     $userBadges = UserBadge::where('user_id', $user->id)->get();
