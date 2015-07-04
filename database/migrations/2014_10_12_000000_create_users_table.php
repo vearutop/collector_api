@@ -33,7 +33,7 @@ class CreateUsersTable extends Migration
             $table->string('name');
             $table->unique('name');
             $table->string('api_key');
-            $table->integer('owner_user_id')->unsigned();
+            $table->integer('owner_user_id')->unsigned()->nullable();
             $table->foreign('owner_user_id')->references('id')->on('users');
 
             $table->timestamps();
@@ -41,8 +41,8 @@ class CreateUsersTable extends Migration
 
         Schema::create('tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('issuer_id')->nullable();
-            //$table->foreign('issuer_id')->references('id')->on('issuers');
+            $table->integer('issuer_id')->nullable()->unsigned();
+            $table->foreign('issuer_id')->references('id')->on('issuers');
 
             $table->string('name');
             $table->timestamps();
@@ -68,8 +68,8 @@ class CreateUsersTable extends Migration
             $table->integer('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
 
-            $table->integer('origin_user_id')->nullable();
-            //$table->foreign('origin_user_id')->references('id')->on('users');
+            $table->integer('origin_user_id')->unsigned()->nullable();
+            $table->foreign('origin_user_id')->references('id')->on('users');
 
             $table->integer('tag_id')->unsigned();
             $table->foreign('tag_id')->references('id')->on('tags');
