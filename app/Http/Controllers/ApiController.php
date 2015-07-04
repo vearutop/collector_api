@@ -283,6 +283,7 @@ class ApiController extends Controller
         try {
             if ($points) {
                 $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+                //$userInfo = file_get_contents('https://slack.com/api/users.info?token=' . $_REQUEST['token'] . '&');
             }
             else {
                 if ('top' === $text[0]) {
@@ -316,7 +317,7 @@ class ApiController extends Controller
         }
 
         $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName" . "\n" . $this->getMessage());
-        return 'okay';
+        return 'okay ' . print_r($_REQUEST, 1);
     }
 
 
