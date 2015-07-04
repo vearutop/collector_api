@@ -103,12 +103,12 @@ class CreateUsersTable extends Migration
      */
     public function down()
     {
-        Schema::drop('users');
+        Schema::drop('users_tags_history');
+        Schema::drop('users_badges');
+        Schema::drop('users_tags');
         Schema::drop('badges');
         Schema::drop('tags');
-        Schema::drop('users_tags');
-        Schema::drop('users_tags_history');
         Schema::drop('issuers');
-        Schema::drop('users_badges');
+        Schema::drop('users');
     }
 }
