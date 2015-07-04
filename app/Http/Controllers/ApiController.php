@@ -313,12 +313,15 @@ class ApiController extends Controller
 
                 elseif ('info' === $text[0]) {
                     $user = User::where('login', $userLogin)->where('type', $userType)->first();
+                    if (!$user) {
+                        return 'Not found.';
+                    }
                     $userTags = UserTag::where('user_id', $user->id)->get();
                     $userBadges = UserBadge::where('user_id', $user->id)->get();
 
                     $tagData = array();
                     foreach ($userTags as $userTag) {
-                        $tagData[$userTag->id] = array('name' => Tag::find($userTag->tag_id)->name, 'points' => $userTag->points, 'badges' => '');
+                        $tagData[$userTag->tag_id] = array('name' => Tag::where('id', $userTag->tag_id)->first()->name, 'points' => $userTag->points, 'badges' => '');
                     }
                     foreach ($userBadges as $userBadge) {
                         $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->name;
