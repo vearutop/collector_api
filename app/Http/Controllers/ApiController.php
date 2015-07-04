@@ -280,7 +280,8 @@ class ApiController extends Controller
             $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
         }
         catch (\Exception $e) {
-            return $e->getMessage();
+            echo "Callback failed. Please try again later.";
+            die;
         }
 
 
@@ -291,6 +292,7 @@ class ApiController extends Controller
         // set URL and other appropriate options
         \curl_setopt($ch, CURLOPT_URL, $url);
         \curl_setopt($ch, CURLOPT_HEADER, 0);
+        \curl_setopt($ch,CURLOPT_RETURNTRANSER,1);
 
         // grab URL and pass it to the browser
         \curl_exec($ch);
