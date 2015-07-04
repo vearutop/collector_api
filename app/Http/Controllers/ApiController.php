@@ -283,6 +283,20 @@ class ApiController extends Controller
             return $e->getMessage();
         }
 
+        // create a new cURL resource
+        $ch = curl_init();
+        curl_setopt($ch,CURLOPT_POSTFIELDS, $_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
+        $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=s3KBEGSbzeKI6maAEFtZEus2&channel=%23".$_REQUEST['channel_name'] ;
+        // set URL and other appropriate options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+
+        // grab URL and pass it to the browser
+        curl_exec($ch);
+
+        // close cURL resource, and free up system resources
+        curl_close($ch);
+
         return $this->getMessage();
     }
 
