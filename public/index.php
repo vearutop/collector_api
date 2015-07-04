@@ -1,10 +1,8 @@
 <?php
 
-if (isset($_POST) && array_values($_POST) === array('')) {
-    $f = file_get_contents('php://input');
-    if ($f{0} === '{') {
-        $_POST = json_decode($f, 1);
-    }
+$f = trim(file_get_contents('php://input'));
+if (($f[0] === '{') || $f[0] === '[') {
+    $_POST = json_decode($f, 1);
 }
 
 /**
