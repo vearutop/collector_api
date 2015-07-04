@@ -310,7 +310,7 @@ class ApiController extends Controller
             }
         }
         catch (\Exception $e) {
-            echo "Callback failed. Please try again later.";
+            echo $e->getMessage();
             die;
         }
 
@@ -327,7 +327,7 @@ class ApiController extends Controller
         // set URL and other appropriate options
         \curl_setopt($ch, CURLOPT_URL, $url);
         \curl_setopt($ch, CURLOPT_HEADER, 0);
-        \curl_setopt($ch,CURLOPT_RETURNTRANSER,1);
+        \curl_setopt($ch, CURLOPT_RETURNTRANSER, 1);
 
         // grab URL and pass it to the browser
         \curl_exec($ch);
