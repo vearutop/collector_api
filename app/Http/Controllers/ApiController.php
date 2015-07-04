@@ -239,6 +239,7 @@ class ApiController extends Controller
     {
         file_put_contents('/tmp/hb.log', print_r($_REQUEST, 1), FILE_APPEND);
 
+
         header("Content-Type: application/json");
         $result = array();
         $result['status'] = 'ok';
