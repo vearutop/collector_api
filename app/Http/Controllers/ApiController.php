@@ -342,7 +342,7 @@ class ApiController extends Controller
                 elseif ('help' === $text[0]) {
                     return '`/hb +1 @username topic` to promote' . "\n"
                     . '`/hb info @username` to get achievements' . "\n"
-                    . '`hb top topic` to get the master of topic';
+                    . '`/hb top topic` to get the master of topic';
                 }
                 else {
                     throw new \Exception('Try `/hb help`');
