@@ -285,7 +285,7 @@ class ApiController extends Controller
 
 
         // create a new cURL resource
-        $ch = curl_init();
+        $ch = \curl_init();
         \curl_setopt($ch,CURLOPT_POSTFIELDS, $_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
         $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=s3KBEGSbzeKI6maAEFtZEus2&channel=%23".$_REQUEST['channel_name'] ;
         // set URL and other appropriate options
