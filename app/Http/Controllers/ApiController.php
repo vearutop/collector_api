@@ -153,7 +153,7 @@ class ApiController extends Controller
     /** @var  UserTagHistory */
     private $userTagHistory;
 
-    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin) {
+    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl = '') {
         if (!$userLogin) {
             throw new Exception('Undefined user');
         }
@@ -175,7 +175,7 @@ class ApiController extends Controller
 
         $this->user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
         $this->originUser = $originUserLogin
-            ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin))
+            ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin, 'avatar_url' => $avatarUrl))
             : null;
         $this->issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
         $this->tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $this->issuer->id));
@@ -228,8 +228,9 @@ class ApiController extends Controller
             $points = $request->get('points', 1);
             $points = $demote ? -abs($points) : abs($points);
             $issuerName = $request->get('issuer');
+            $avatarUrl = $request->get('avatar_url');
 
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl);
             $result['message'] = $this->getMessage();
             $result['badges_issued'] = $this->userBadgesIssued;
         }

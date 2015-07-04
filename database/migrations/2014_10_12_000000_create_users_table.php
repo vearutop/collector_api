@@ -16,6 +16,7 @@ class CreateUsersTable extends Migration
             $table->increments('id');
             $table->string('login');
             $table->string('type'); // type of login, i.e. github, google, etc.
+            $table->string('avatar_url');
             $table->unique(array('login', 'type'));
             $table->timestamps();
         });
