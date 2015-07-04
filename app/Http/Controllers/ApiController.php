@@ -303,6 +303,7 @@ class ApiController extends Controller
                     if ($user) {
                         $this->slackResponse('@' . $user->login . ' is the top about ' . $tagText);
                         return;
+                        // for the kaaaarma!
                     }
                     else {
                         return 'oops three';
