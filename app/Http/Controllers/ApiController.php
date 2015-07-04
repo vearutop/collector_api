@@ -15,7 +15,7 @@ use Mockery\CountValidator\Exception;
 
 class ApiController extends Controller
 {
-    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin) {
+    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl) {
         if (!$userLogin) {
             throw new Exception('Undefined user');
         }
@@ -51,6 +51,7 @@ class ApiController extends Controller
             'tag_id' => $tag->id,
             'points' => $points,
             'origin_user_id' => $originUser ? $originUser->id : null,
+            'avatar_url' => $avatarUrl,
             ));
     }
 
@@ -68,15 +69,16 @@ class ApiController extends Controller
 
 
         try {
-            $userLogin = $request->get('user');
+            $userLogin = $request->get('username');
             $userType = $request->get('account_type', 'email');
             $originUserLogin = $request->get('origin_user');
             $tagName = $request->get('tag');
-            $points = $request->get('points', 1);
+            $points = $request->get('xp', 1);
             $points = $demote ? -abs($points) : abs($points);
-            $issuerName = $request->get('issuer');
+            $issuerName = $request->get('source');
+            $avatarUrl = $request->get('avatar_url');
 
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl);
         }
         catch (\Exception $e) {
             $result['status'] = 'error';
@@ -121,26 +123,11 @@ class ApiController extends Controller
         $issuerName = 'slack/' . $_REQUEST['team_domain'];
 
         try {
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, "");
         }
         catch (\Exception $e) {
             return $e->getMessage();
         }
-
-
-        // create a new cURL resource
-        $ch = curl_init();
-        curl_setopt($ch,CURLOPT_POSTFIELDS, $_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
-        $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=s3KBEGSbzeKI6maAEFtZEus2&channel=%23".$_REQUEST['channel_name'] ;
-        // set URL and other appropriate options
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-
-        // grab URL and pass it to the browser
-        curl_exec($ch);
-
-        // close cURL resource, and free up system resources
-        curl_close($ch);
 
         return 'Your opinion really matters, thank you!';
     }
