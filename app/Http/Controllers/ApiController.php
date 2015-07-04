@@ -283,6 +283,7 @@ class ApiController extends Controller
             return $e->getMessage();
         }
 
+        /*
         // create a new cURL resource
         $ch = curl_init();
         curl_setopt($ch,CURLOPT_POSTFIELDS, $_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
@@ -296,6 +297,7 @@ class ApiController extends Controller
 
         // close cURL resource, and free up system resources
         curl_close($ch);
+        */
 
         return $this->getMessage();
     }
