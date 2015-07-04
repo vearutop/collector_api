@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Issuer;
 use App\Tag;
 use App\User;
+use App\UserBadge;
 use App\UserTag;
 use App\UserTagHistory;
 use Illuminate\Http\Request;
@@ -15,6 +16,104 @@ use Mockery\CountValidator\Exception;
 
 class ApiController extends Controller
 {
+    const BADGE_BRONZE = 'bronze';
+    const BADGE_SILVER = 'silver';
+    const BADGE_GOLD = 'gold';
+
+    const BADGE_KING = 'king';
+    const BADGE_ROCKET = 'rocket';
+
+    private static $badgeLevels = array(self::BADGE_BRONZE => 5, self::BADGE_SILVER => 50, self::BADGE_GOLD => 500);
+
+    /**
+     * @var UserTag
+     */
+    private $userTag;
+    /** @var UserBadge[] */
+    private $userBadges = array();
+    /** @var string[] */
+    private $userBadgesIssued;
+
+    private $levelBadge;
+
+    private function getBadges() {
+        $badges = UserBadge::where('tag_id', $this->userTag->id)
+            ->where('user_id', $this->userTag->user_id)->get();
+
+        /** @var \App\UserBadge $badge */
+        foreach ($badges as $badge) {
+            if (isset($badge->badge, self::$badgeLevels)) {
+                $this->levelBadge = $badge;
+            }
+
+            $this->userBadges [$badge->badge]= $badge;
+        }
+    }
+
+
+    private function checkLevelBadge() {
+        $currentLevel = null;
+        foreach (self::$badgeLevels as $level => $points) {
+            if ($this->userTag->points >= $points) {
+                $currentLevel = $level;
+            }
+        }
+
+        if (!isset($this->userBadges[$currentLevel])) {
+            $levelBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->id, 'badge' => $currentLevel));
+            $levelBadge->save();
+            $this->levelBadge = $levelBadge;
+            $this->userBadgesIssued []= $currentLevel;
+        }
+    }
+
+    private function checkKingBadge() {
+        if (isset($this->userBadges[self::BADGE_KING])) {
+            return;
+        }
+
+        if (null === $this->levelBadge) {
+            return;
+        }
+
+        $king = UserTag::where('tag_id', $this->userTag->tag_id)->orderBy('points', 'desc')->take(1)->get();
+        if ($king->id === $this->userTag->id) {
+            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->id, 'badge' => self::BADGE_KING));
+            $kingBadge->save();
+            $this->userBadgesIssued []= self::BADGE_KING;
+        }
+    }
+
+
+    private function checkRocketBadge() {
+        die('!');
+        if (isset($this->userBadges[self::BADGE_ROCKET])) {
+            return;
+        }
+
+        if (!in_array(self::BADGE_BRONZE, $this->userBadgesIssued)) {
+            return;
+        }
+
+        if ($this->userTag->created_at) {
+
+        }
+
+    }
+
+
+
+    /** @var  User */
+    private $user;
+    /** @var  User */
+    private $originUser;
+    /** @var  Issuer */
+    private $issuer;
+    /** @var  Tag */
+    private $tag;
+    /** @var  UserTagHistory */
+    private $userTagHistory;
+
     private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin) {
         if (!$userLogin) {
             throw new Exception('Undefined user');
@@ -35,24 +134,39 @@ class ApiController extends Controller
         */
 
 
-        $user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
-        $originUser = $originUserLogin
+        $this->user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
+        $this->originUser = $originUserLogin
             ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin))
             : null;
-        $issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
-        $tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $issuer->id));
+        $this->issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
+        $this->tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $this->issuer->id));
 
-        $userTag = UserTag::firstOrCreate(array('user_id' => $user->id, 'tag_id' => $tag->id));
-        $userTag->points += $points;
-        $userTag->save();
+        $this->userTag = UserTag::firstOrCreate(array('user_id' => $this->user->id, 'tag_id' => $this->tag->id));
+        $this->userTag->points += $points;
+        $this->userTag->save();
 
-        UserTagHistory::create(array(
-            'user_id' => $user->id,
-            'tag_id' => $tag->id,
+        $this->userTagHistory = UserTagHistory::create(array(
+            'user_id' => $this->user->id,
+            'tag_id' => $this->tag->id,
             'points' => $points,
-            'origin_user_id' => $originUser ? $originUser->id : null,
+            'origin_user_id' => $this->originUser ? $this->originUser->id : null,
             ));
+
+
+        $this->getBadges();
+        $this->checkLevelBadge();
+        $this->checkRocketBadge();
+        $this->checkKingBadge();
+
     }
+
+
+
+
+
+
+
+
 
 
     /**
