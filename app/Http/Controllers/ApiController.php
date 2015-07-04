@@ -28,19 +28,18 @@ class ApiController extends Controller
             throw new Exception('Undefined points');
         }
 
+        /*
         if (!$issuerName) {
             throw new Exception('Undefined issuer');
         }
+        */
 
 
         $user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
-        if ($originUserLogin) {
-            $originUser = User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin));
-        }
-        else {
-            $originUser = null;
-        }
-        $issuer = Issuer::firstOrCreate(array('name' => $issuerName));
+        $originUser = $originUserLogin
+            ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin))
+            : null;
+        $issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
         $tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $issuer->id));
 
         $userTag = UserTag::firstOrCreate(array('user_id' => $user->id, 'tag_id' => $tag->id));
@@ -96,6 +95,11 @@ class ApiController extends Controller
     public function demote(Request $request)
     {
         return $this->promote($request, true);
+    }
+
+    public function slack(Request $request)
+    {
+        trigger_error(print_r($_POST,1));
     }
 
 }

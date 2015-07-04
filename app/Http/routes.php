@@ -13,3 +13,5 @@
 Route::any('/api/promote', 'ApiController@promote');
 Route::any('/api/demote', 'ApiController@demote');
 
+Route::any('/api/slack', 'ApiController@slack');
+
