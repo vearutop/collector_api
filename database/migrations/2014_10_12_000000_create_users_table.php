@@ -28,22 +28,8 @@ class CreateUsersTable extends Migration
             $table->timestamps();
         });
 
-        Schema::create('issuers', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->unique('name');
-            $table->string('api_key');
-            $table->integer('owner_user_id')->unsigned()->nullable();
-            $table->foreign('owner_user_id')->references('id')->on('users');
-
-            $table->timestamps();
-        });
-
         Schema::create('tags', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('issuer_id')->nullable()->unsigned();
-            $table->foreign('issuer_id')->references('id')->on('issuers');
-
             $table->string('name');
             $table->timestamps();
         });
@@ -108,7 +94,6 @@ class CreateUsersTable extends Migration
         Schema::drop('users_tags');
         Schema::drop('badges');
         Schema::drop('tags');
-        Schema::drop('issuers');
         Schema::drop('users');
     }
 }

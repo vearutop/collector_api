@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Issuer;
 use App\Tag;
 use App\User;
 use App\UserBadge;
@@ -146,14 +145,12 @@ class ApiController extends Controller
     private $user;
     /** @var  User */
     private $originUser;
-    /** @var  Issuer */
-    private $issuer;
     /** @var  Tag */
     private $tag;
     /** @var  UserTagHistory */
     private $userTagHistory;
 
-    private function addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl = '') {
+    private function addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl = '') {
         if (!$userLogin) {
             throw new Exception('Undefined user');
         }
@@ -166,12 +163,6 @@ class ApiController extends Controller
             throw new Exception('Undefined points');
         }
 
-        /*
-        if (!$issuerName) {
-            throw new Exception('Undefined issuer');
-        }
-        */
-
         $this->user = User::where('login', $userLogin)->where('type', $userType)->first();
         if (!$this->user) {
             $this->user = User::create(array('type' => $userType, 'login' => $userLogin, 'avatar_url' => $avatarUrl));
@@ -180,8 +171,7 @@ class ApiController extends Controller
         $this->originUser = $originUserLogin
             ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin))
             : null;
-        $this->issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
-        $this->tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $this->issuer->id));
+        $this->tag = Tag::firstOrCreate(array('name' => $tagName));
 
         $this->userTag = UserTag::firstOrCreate(array('user_id' => $this->user->id, 'tag_id' => $this->tag->id));
         $this->userTag->points += $points;
@@ -230,10 +220,9 @@ class ApiController extends Controller
             $tagName = $request->get('tag');
             $points = $request->get('points', 1);
             $points = $demote ? -abs($points) : abs($points);
-            $issuerName = $request->get('issuer');
             $avatarUrl = $request->get('avatar_url');
 
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin, $avatarUrl);
+            $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl);
             $result['message'] = $this->getMessage();
             $result['badges_issued'] = $this->userBadgesIssued;
         }
@@ -278,18 +267,17 @@ class ApiController extends Controller
         $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
         $tagName = isset($text[2]) ? $text[2] : 'karma';
         $userType = 'slack';
-        $issuerName = 'slack/' . $_REQUEST['team_domain'];
 
         try {
             if ($points) {
-                $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin);
                 //$userInfo = file_get_contents('https://slack.com/api/users.info?token=' . $_REQUEST['token'] . '&');
             }
             else {
                 if ('top' === $text[0]) {
                     $tagText = $text[1];
 
-                    $tag = $this->getTag($issuerName, $text[1]);
+                    $tag = $this->getTag($text[1]);
                     if (!$tag) {
                         $this->slackResponse($text[1] . ' not found.');
                         return 'oops one';
@@ -379,17 +367,11 @@ class ApiController extends Controller
 
 
     /**
-     * @param $issuerName
      * @param $tagName
-     * @return null|Tag
+     * @return Tag|null
      */
-    private function getTag($issuerName, $tagName) {
-        $issuer = Issuer::where('name', $issuerName)->first();
-        if (!$issuer) {
-            return null;
-        }
-
-        $tag = Tag::where('name', $tagName)->where('issuer_id', $issuer->id)->first();
+    private function getTag($tagName) {
+        $tag = Tag::where('name', $tagName)->first();
         return $tag;
     }
 
