@@ -318,10 +318,10 @@ class ApiController extends Controller
 
                     $tagData = array();
                     foreach ($userTags as $userTag) {
-                        $tagData[$userTag->id] = array('name' => $userTag->name, 'points' => $userTag->points, 'badges' => '');
+                        $tagData[$userTag->id] = array('name' => Tag::find($userTag->tag_id)->name, 'points' => $userTag->points, 'badges' => '');
                     }
                     foreach ($userBadges as $userBadge) {
-                        $tagData[$user]['badges'] .= ' ' . $userBadge->name;
+                        $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->name;
                     }
 
                     $report = '@' . $user->login . ' is recognized for ' . "\n";
