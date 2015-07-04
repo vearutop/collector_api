@@ -310,6 +310,32 @@ class ApiController extends Controller
                     }
 
                 }
+
+                elseif ('@' === $text[0][0]) {
+                    $userName = substr($text[0], 1);
+                    $user = User::where('login', $userName)->where('type', $userType)->first();
+                    $userTags = UserTag::where('user_id', $user->id)->get();
+                    $userBadges = UserBadge::where('user_id', $user->id)->get();
+
+                    $tagData = array();
+                    foreach ($userTags as $userTag) {
+                        $tagData[$userTag->id] = array('name' => $userTag->name, 'points' => $userTag->points, 'badges' => '');
+                    }
+                    foreach ($userBadges as $userBadge) {
+                        $tagData[$user]['badges'] .= ' ' . $userBadge->name;
+                    }
+
+                    $report = '@' . $user->login . ' is recognized for ' . "\n";
+                    foreach ($tagData as $tagId => $tagInfo) {
+                        $report .= $tagInfo['name'] . ' with ' . $tagInfo['points'] . ' points '
+                            . ($tagInfo['badges']
+                                ? 'and is rewarded with: ' . str_replace(' ', ', ', trim($tagInfo['badges']))
+                                : '')
+                            . "\n";
+                    }
+                    $this->slackResponse($report);
+                    return 'Thank you for curiosity. See you in the library.';
+                }
             }
         }
         catch (\Exception $e) {
