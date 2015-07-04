@@ -60,7 +60,7 @@ class ApiController extends Controller
     }
 
     private function getBadges() {
-        $badges = UserBadge::where('tag_id', $this->userTag->id)
+        $badges = UserBadge::where('tag_id', $this->userTag->tag_id)
             ->where('user_id', $this->userTag->user_id)->get();
 
         /** @var \App\UserBadge $badge */
@@ -86,7 +86,7 @@ class ApiController extends Controller
             $levelBadge = UserBadge::create(
                 array(
                     'user_id' => $this->userTag->user_id,
-                    'tag_id' => $this->userTag->id,
+                    'tag_id' => $this->userTag->tag_id,
                     'badge' => $currentLevel
                 ));
             $levelBadge->save();
@@ -111,7 +111,7 @@ class ApiController extends Controller
                 $prevKingBadge->delete();
             }
 
-            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->id, 'badge' => self::BADGE_KING));
+            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_KING));
             $kingBadge->save();
 
 
@@ -133,7 +133,7 @@ class ApiController extends Controller
         $createdUt = strtotime($this->userTag->created_at);
         $updatedUt = strtotime($this->userTag->updated_at);
         if ($updatedUt - $createdUt < self::ROCKET_TIME) {
-            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->id, 'badge' => self::BADGE_ROCKET));
+            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_ROCKET));
             $kingBadge->save();
             $this->userBadgesIssued []= self::BADGE_ROCKET;
         }
