@@ -35,7 +35,8 @@ RUN yum -y install php55u-fpm \
     php55u-mcrypt \
     php55u-pecl-xdebug \
     php55u-pdo \
-    php55u-mbstring
+    php55u-mbstring \
+    php55u-mysql
 
 
 # Composer
@@ -60,6 +61,7 @@ RUN mkdir -p /var/www && chown -R nginx /var/www
 ADD . /var/www
 RUN cd /var/www && composer install
 
+ADD docker/laravel.env /var/www/.env
 ADD ./docker/nginx/*.conf /etc/nginx/conf.d/
 ADD ./docker/php-fpm/www.conf /etc/php-fpm.d/www.conf
 ADD ./docker/php-fpm/php.ini /etc/php.ini
