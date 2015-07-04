@@ -99,7 +99,8 @@ class ApiController extends Controller
 
     public function slack(Request $request)
     {
-        trigger_error(print_r($_REQUEST,1));
+        file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
+        return '';
     }
 
 }
