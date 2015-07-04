@@ -307,7 +307,8 @@ class ApiController extends Controller
             }
         }
         catch (\Exception $e) {
-            return $e->getMessage();
+            echo "Callback failed. Please try again later.";
+            die;
         }
 
         $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
@@ -323,6 +324,7 @@ class ApiController extends Controller
         // set URL and other appropriate options
         \curl_setopt($ch, CURLOPT_URL, $url);
         \curl_setopt($ch, CURLOPT_HEADER, 0);
+        \curl_setopt($ch,CURLOPT_RETURNTRANSER,1);
 
         // grab URL and pass it to the browser
         \curl_exec($ch);
