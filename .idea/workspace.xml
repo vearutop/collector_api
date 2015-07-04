@@ -197,8 +197,8 @@
       <file leaf-file-name="ApiController.php" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app/Http/Controllers/ApiController.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.5739645">
-              <caret line="103" column="79" selection-start-line="103" selection-start-column="79" selection-end-line="103" selection-end-column="79" />
+            <state vertical-scroll-proportion="0.8579882">
+              <caret line="128" column="0" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
               <folding>
                 <element signature="e#40#55#0#PHP" expanded="true" />
               </folding>
@@ -690,7 +690,13 @@
       <option name="project" value="LOCAL" />
       <updated>1436024611569</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="slack endpoint">
+      <created>1436024655101</created>
+      <option name="number" value="00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1436024655101</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1017,8 +1023,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app/Http/Controllers/ApiController.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.5739645">
-          <caret line="103" column="79" selection-start-line="103" selection-start-column="79" selection-end-line="103" selection-end-column="79" />
+        <state vertical-scroll-proportion="0.8579882">
+          <caret line="128" column="0" selection-start-line="128" selection-start-column="0" selection-end-line="128" selection-end-column="0" />
           <folding>
             <element signature="e#40#55#0#PHP" expanded="true" />
           </folding>

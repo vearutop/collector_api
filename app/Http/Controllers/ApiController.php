@@ -100,8 +100,34 @@ class ApiController extends Controller
     public function slack(Request $request)
     {
         //file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
+        $originUserLogin = $_REQUEST['user_name'];
+        /**
+         *   [token] => tXCT7j2VkyWJD1nbjgePr3YS
+        [team_id] => T076QNKKQ
+        [team_domain] => hb-acme
+        [channel_id] => C076R0U1Z
+        [channel_name] => general
+        [user_id] => U076QV8L8
+        [user_name] => vearutop
+        [command] => /hb
+        [text] => -1 @mdzor
+         */
 
-        return 'Your opinion really matters, thank you!' . print_r($_REQUEST, 1);
+        $text = explode(' ', $_REQUEST['text']);
+        $points = $text[0];
+        $userLogin = substr(1, $text[1]);
+        $tagName = isset($text[2]) ? $text[2] : 'karma';
+        $userType = 'slack';
+        $issuerName = 'slack/' . $_REQUEST['team_domain'];
+
+        try {
+            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+        }
+        catch (\Exception $e) {
+            return $e->getMessage();
+        }
+
+        return 'Your opinion really matters, thank you!';
     }
 
 }
