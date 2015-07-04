@@ -343,14 +343,19 @@ class ApiController extends Controller
                     $userBadges = UserBadge::where('user_id', $user->id)->get();
 
                     $tagData = array();
+                    $totalPoints = 0;
                     foreach ($userTags as $userTag) {
+                        $totalPoints += $userTag->points;
                         $tagData[$userTag->tag_id] = array('name' => Tag::where('id', $userTag->tag_id)->first()->name, 'points' => $userTag->points, 'badges' => '');
                     }
                     foreach ($userBadges as $userBadge) {
                         $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->badge;
                     }
 
-                    $report = '@' . $user->login . ' is recognized for ' . "\n";
+                    $lvl = floor($totalPoints / 10);
+
+                    $report = '@' . $this->getLoginName($user->login) . 'lvl' . $lvl
+                        . ' with ' . $totalPoints . ' is recognized for ' . "\n";
                     foreach ($tagData as $tagId => $tagInfo) {
                         $report .= $tagInfo['name'] . ' with ' . $tagInfo['points'] . ' points '
                             . ($tagInfo['badges']
