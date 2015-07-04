@@ -28,14 +28,14 @@ RUN echo "daemon off;" >> /etc/nginx/nginx.conf
 
 # PHP
 RUN yum -y install memcached-devel
-RUN yum -y install php54-fpm \
-    php54-cli \
-    php54-pecl-memcached \
-    php54-xml \
-    php54-mcrypt \
-    php54-pecl-xdebug \
-    php54-pdo \
-    php54-mbstring
+RUN yum -y install php55u-fpm \
+    php55u-cli \
+    php55u-pecl-memcached \
+    php55u-xml \
+    php55u-mcrypt \
+    php55u-pecl-xdebug \
+    php55u-pdo \
+    php55u-mbstring
 
 
 # Composer
