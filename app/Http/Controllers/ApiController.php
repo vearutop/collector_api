@@ -253,6 +253,7 @@ class ApiController extends Controller
         return $this->promote($request, true);
     }
 
+
     public function slack(Request $request)
     {
         //file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
@@ -270,23 +271,54 @@ class ApiController extends Controller
          */
 
         $text = explode(' ', $_REQUEST['text']);
-        $points = $text[0];
+        $points = (int)$text[0];
         $userLogin = substr($text[1], 1);
         $tagName = isset($text[2]) ? $text[2] : 'karma';
         $userType = 'slack';
         $issuerName = 'slack/' . $_REQUEST['team_domain'];
 
         try {
-            $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            if ($points) {
+                $this->addPoints($userLogin, $userType, $issuerName, $tagName, $points, $originUserLogin);
+            }
+            else {
+                if ('top' === $text[0]) {
+                    $tagText = $text[1];
+
+                    $tag = $this->getTag($issuerName, $text[1]);
+                    if (!$tag) {
+                        $this->slackResponse($text[1] . ' not found.');
+                        return 'oops one';
+                    }
+                    $userTag = UserTag::where('tag_id', $tag->id)->orderBy('points', 'desc')->take(1)->first();
+                    if (!$userTag) {
+                        $this->slackResponse($text[1] . ' not found.');
+                        return 'oops two';
+                    }
+                    $user = User::find($userTag->user_id);
+                    if ($user) {
+                        $this->slackResponse($user->name . ' is the top about ' . $tagText);
+                    }
+                    else {
+                        return 'oops three';
+                    }
+
+                }
+            }
         }
         catch (\Exception $e) {
             return $e->getMessage();
         }
 
+        $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
+        return $this->getMessage();
+    }
 
+
+    private function slackResponse($text) {
         // create a new cURL resource
         $ch = \curl_init();
-        \curl_setopt($ch,CURLOPT_POSTFIELDS, $_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
+        \curl_setopt($ch,CURLOPT_POSTFIELDS, $text);
         $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=s3KBEGSbzeKI6maAEFtZEus2&channel=%23".$_REQUEST['channel_name'] ;
         // set URL and other appropriate options
         \curl_setopt($ch, CURLOPT_URL, $url);
@@ -298,8 +330,22 @@ class ApiController extends Controller
         // close cURL resource, and free up system resources
         \curl_close($ch);
 
+    }
 
-        return $this->getMessage();
+
+    /**
+     * @param $issuerName
+     * @param $tagName
+     * @return null|Tag
+     */
+    private function getTag($issuerName, $tagName) {
+        $issuer = Issuer::where('name', $issuerName)->first();
+        if (!$issuer) {
+            return null;
+        }
+
+        $tag = Tag::where('name', $tagName)->where('issuer_id', $issuer->id)->first();
+        return $tag;
     }
 
 }
