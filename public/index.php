@@ -1,5 +1,12 @@
 <?php
 
+if (isset($_POST) && array_values($_POST) === array('')) {
+    $f = file_get_contents('php://input');
+    if ($f{0} === '{') {
+        $_POST = json_decode($f, 1);
+    }
+}
+
 /**
  * Laravel - A PHP Framework For Web Artisans
  *

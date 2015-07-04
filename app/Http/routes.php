@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -11,10 +10,6 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::any('/api/promote', 'ApiController@promote');
+Route::any('/api/demote', 'ApiController@demote');
 
-
-Route::get('/api/promote', 'ApiController@promote');
-Route::get('/api/demote', 'ApiController@demote');
