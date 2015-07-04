@@ -312,11 +312,11 @@ class ApiController extends Controller
         }
         catch (\Exception $e) {
             echo $e->getMessage();
-            die;
+            return;
         }
 
-        $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName");
-        return $this->getMessage();
+        $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName" . "\n" . $this->getMessage());
+        return 'okay';
     }
 
 
