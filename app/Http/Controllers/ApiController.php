@@ -172,10 +172,13 @@ class ApiController extends Controller
         }
         */
 
+        $this->user = User::where('login', $userLogin)->where('type', $userType)->first();
+        if (!$this->user) {
+            $this->user = User::create(array('type' => $userType, 'login' => $userLogin, 'avatar_url' => $avatarUrl));
+        }
 
-        $this->user = User::firstOrCreate(array('type' => $userType, 'login' => $userLogin));
         $this->originUser = $originUserLogin
-            ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin, 'avatar_url' => $avatarUrl))
+            ? User::firstOrCreate(array('type' => $userType, 'login' => $originUserLogin))
             : null;
         $this->issuer = $issuerName ? Issuer::firstOrCreate(array('name' => $issuerName)) : null;
         $this->tag = Tag::firstOrCreate(array('name' => $tagName, 'issuer_id' => $this->issuer->id));
