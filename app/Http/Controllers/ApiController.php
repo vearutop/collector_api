@@ -223,9 +223,9 @@ class ApiController extends Controller
             return;
         }
 
-        $count = UserTagHistory::select(DB::raw('count(distinct origin_user_id) as count'))
+        $count = UserTagHistory::select(DB::raw('count(distinct origin_user_id) as tag_id'))
             ->get();
-        if ($count['count'] > 50) {
+        if ($count[0]['tag_id'] > 5) {
             $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_FAMOUS));
             $this->userBadgesIssued []= self::BADGE_FAMOUS;
             $userBadge->save();
