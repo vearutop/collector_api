@@ -393,6 +393,12 @@ class ApiController extends Controller
          */
 
         $text = explode(' ', $_REQUEST['text']);
+        if ('+' === $text[0]) {
+            $text[0] = 1;
+        }
+        elseif ('-' === $text[0]) {
+            $text[0] = -1;
+        }
         $points = (int)$text[0];
         $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
         $tagName = isset($text[2]) ? $text[2] : self::TAG_KARMA;
