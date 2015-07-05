@@ -528,6 +528,9 @@ class ApiController extends Controller
 
         file_put_contents('/tmp/github-issues.post.log', print_r($_POST, 1), FILE_APPEND);
 
+        if (!isset($_POST['action']) || 'closed' != $_POST['action']) {
+            return '';
+        }
 
         $userLogin = $_POST['sender']['login'];
         $avatarUrl = $_POST['sender']['avatar_url'];
@@ -545,6 +548,8 @@ class ApiController extends Controller
                 }
             }
         }
+
+        return 'ok';
 
     }
 }
