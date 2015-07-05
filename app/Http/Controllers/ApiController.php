@@ -246,7 +246,11 @@ class ApiController extends Controller
     /** @var  UserTagHistory */
     private $userTagHistory;
 
-    private function addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl = '') {
+    private function addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl, $teamId) {
+        if (!$teamId) {
+            $teamId = 0;
+        }
+
         if (!$userLogin) {
             throw new Exception('Undefined user');
         }
@@ -259,9 +263,19 @@ class ApiController extends Controller
             throw new Exception('Undefined points');
         }
 
+        $team = Team::where('id', $teamId)->first();
+        if(!$team) {
+            throw new Exception('team was not found');
+        }
+
         $this->user = User::where('login', $userLogin)->where('type', $userType)->first();
         if (!$this->user) {
-            $this->user = User::create(array('type' => $userType, 'login' => $userLogin, 'avatar_url' => $avatarUrl));
+            $this->user = User::create(array(
+                'type' => $userType,
+                'login' => $userLogin,
+                'avatar_url' => $avatarUrl,
+                'team_id' =>$teamId,
+                ));
         }
 
         $this->originUser = $originUserLogin
@@ -309,9 +323,10 @@ class ApiController extends Controller
                 $tagName = isset($item['tag']) ? $item['tag'] : null;
                 $points = isset($item['points']) ? $item['points'] : 1;
                 $points = $demote ? -abs($points) : abs($points);
-                $avatarUrl = isset($item['avatar_url']) ? $item['avatar_url'] : null;;
+                $avatarUrl = isset($item['avatar_url']) ? $item['avatar_url'] : null;
+                $teamId = $item['team_id'];
 
-                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl);
+                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl, $teamId);
                 $res['status'] = 'ok';
                 $res['message'] = $this->getMessage();
                 $res['badges_issued'] = $this->userBadgesIssued;
@@ -354,8 +369,9 @@ class ApiController extends Controller
             $points = $request->get('points', 1);
             $points = $demote ? -abs($points) : abs($points);
             $avatarUrl = $request->get('avatar_url');
+            $teamId = $request->get('team_id');
 
-            $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl);
+            $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, $avatarUrl, $teamId);
             $result['message'] = $this->getMessage();
             $result['badges_issued'] = $this->userBadgesIssued;
         }
@@ -395,6 +411,7 @@ class ApiController extends Controller
         [text] => -1 @mdzor
          */
 
+        $teamId = $_GET['team_id'];
         $text = explode(' ', $_REQUEST['text']);
         if ('+' === $text[0]) {
             $text[0] = 1;
@@ -409,9 +426,9 @@ class ApiController extends Controller
 
         try {
             if ($points) {
-                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin);
+                $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin, '', $teamId);
                 if ($tagName != self::TAG_KARMA) {
-                    $this->addPoints($userLogin, $userType, self::TAG_KARMA, $points, $originUserLogin);
+                    $this->addPoints($userLogin, $userType, self::TAG_KARMA, $points, $originUserLogin, '', $teamId);
                 }
                 //$userInfo = file_get_contents('https://slack.com/api/users.info?token=' . $_REQUEST['token'] . '&');
             }
@@ -528,11 +545,12 @@ class ApiController extends Controller
 
         $userLogin = $_REQUEST['sender']['login'];
         $avatarUrl = $_REQUEST['sender']['avatar_url'];
+        $teamId = $_GET['team_id'];
 
         if ($_REQUEST['action'] === 'closed') {
             if (isset($_REQUEST['issue']['labels'])) {
                 foreach ($_REQUEST['issue']['labels'] as $labelItem) {
-                    $this->addPoints($userLogin, 'github', $labelItem['name'], 1, null, $avatarUrl);
+                    $this->addPoints($userLogin, 'github', $labelItem['name'], 1, null, $avatarUrl, $teamId);
                 }
             }
         }
