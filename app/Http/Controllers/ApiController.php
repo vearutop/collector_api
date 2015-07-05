@@ -422,7 +422,7 @@ class ApiController extends Controller
                     }
                     $user = User::where('id', $userTag->user_id)->first();
                     if ($user) {
-                        $this->slackResponse('@' . $user->login . ' is the top about ' . $tagText . ' with ' . $userTag->points . ' points.');
+                        $this->slackResponse('@' . $this->getLoginName($user->login) . ' is the top about ' . $tagText . ' with ' . $userTag->points . ' points.');
                         return;
                         // for the kaaaarma!
                     }
