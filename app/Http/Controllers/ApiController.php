@@ -525,5 +525,17 @@ class ApiController extends Controller
 
     public function githubIssues() {
         file_put_contents('/tmp/github-issues.log', file_get_contents('php://input'), FILE_APPEND);
+
+        $userLogin = $_REQUEST['sender']['login'];
+        $avatarUrl = $_REQUEST['sender']['avatar_url'];
+
+        if ($_REQUEST['action'] === 'closed') {
+            if (isset($_REQUEST['issue']['labels'])) {
+                foreach ($_REQUEST['issue']['labels'] as $labelItem) {
+                    $this->addPoints($userLogin, 'github', $labelItem['name'], 1, null, $avatarUrl);
+                }
+            }
+        }
+
     }
 }
