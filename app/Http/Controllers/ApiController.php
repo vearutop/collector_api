@@ -450,7 +450,7 @@ class ApiController extends Controller
                         $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->badge;
                     }
 
-                    $lvl = floor($totalPoints / 10);
+                    $lvl = ceil($totalPoints / 10);
 
                     $report = '@' . $this->getLoginName($user->login) . ' at lvl' . $lvl
                         . ' with ' . $totalPoints . ' is recognized for ' . "\n";
