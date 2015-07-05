@@ -540,6 +540,7 @@ class ApiController extends Controller
                     }
                     catch (\Exception $e) {
                         echo $e->getMessage(), "\n";
+                        print_r($e->getTrace());
                     }
                 }
             }
