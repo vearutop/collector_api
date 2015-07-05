@@ -459,7 +459,7 @@ class ApiController extends Controller
                     $lvl = ceil($totalPoints / 10);
 
                     $report = '@' . $this->getLoginName($user->login) . ' at lvl' . $lvl
-                        . ' with ' . $totalPoints . ' is recognized for ' . "\n";
+                        . ' with ' . $totalPoints . ' points is recognized for ' . "\n";
                     foreach ($tagData as $tagId => $tagInfo) {
                         $report .= $tagInfo['name'] . ' with ' . $tagInfo['points'] . ' points '
                             . ($tagInfo['badges']
