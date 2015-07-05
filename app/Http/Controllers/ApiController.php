@@ -526,7 +526,7 @@ class ApiController extends Controller
     public function githubIssues() {
         file_put_contents('/tmp/github-issues.log', file_get_contents('php://input'), FILE_APPEND);
 
-        file_put_contents('/tmp/github-issues.post.log', print_r($_POST), FILE_APPEND);
+        file_put_contents('/tmp/github-issues.post.log', print_r($_POST, 1), FILE_APPEND);
 
 
         $userLogin = $_POST['sender']['login'];
