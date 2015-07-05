@@ -16,3 +16,7 @@ Route::any('/api/demote', 'ApiController@demote');
 Route::any('/api/slack', 'ApiController@slack');
 Route::any('/api/slack/', 'ApiController@slack');
 
+Route::any('/api/github-issues', 'ApiController@githubIssues');
+Route::any('/api/github-issues/', 'ApiController@githubIssues');
+
+

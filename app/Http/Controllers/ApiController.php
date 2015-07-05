@@ -521,4 +521,9 @@ class ApiController extends Controller
         return $tag;
     }
 
+
+
+    public function githubIssues() {
+        file_put_contents('/tmp/github-issues.log', file_get_contents('php://input'), FILE_APPEND);
+    }
 }
