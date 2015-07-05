@@ -496,6 +496,8 @@ class ApiController extends Controller
 
 
     private function slackResponse($text) {
+        $text = str_replace('rocket', 'rocket :rocket:', $text);
+
         // create a new cURL resource
         $ch = \curl_init();
         \curl_setopt($ch,CURLOPT_POSTFIELDS, $text);
