@@ -218,6 +218,9 @@ class ApiController extends Controller
             return;
         }
 
+        throw new \Exception(print_r($userBadge, 1));
+
+
         $tag = Tag::where('name', self::TAG_KARMA)->first();
         if (!$tag) {
             return;
