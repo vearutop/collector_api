@@ -535,7 +535,12 @@ class ApiController extends Controller
         if ($_POST['action'] === 'closed') {
             if (isset($_POST['issue']['labels'])) {
                 foreach ($_POST['issue']['labels'] as $labelItem) {
-                    $this->addPoints($userLogin, 'github', $labelItem['name'], 1, null, $avatarUrl);
+                    try {
+                        $this->addPoints($userLogin, 'github', $labelItem['name'], 1, null, $avatarUrl);
+                    }
+                    catch (\Exception $e) {
+                        echo $e->getMessage(), "\n";
+                    }
                 }
             }
         }
