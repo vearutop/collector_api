@@ -488,7 +488,7 @@ class ApiController extends Controller
             return $e->getMessage();
         }
 
-        $this->slackResponse($_REQUEST['user_name'] . " gave $points to $userLogin for $tagName" . "\n" . $this->getMessage());
+        $this->slackResponse("@".$_REQUEST['user_name'] . " gave $points to @$userLogin for *$tagName*" . "\n" . $this->getMessage());
         return 'Your opinion really matters. Thank you!';
     }
 
