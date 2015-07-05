@@ -442,21 +442,23 @@ class ApiController extends Controller
                 }
 
                 elseif ('info' === $text[0]) {
-                    $user = User::where('login', $userLogin)->where('type', $userType)->first();
-                    if (!$user) {
-                        return 'Not found.';
-                    }
-                    $userTags = UserTag::where('user_id', $user->id)->get();
-                    $userBadges = UserBadge::where('user_id', $user->id)->get();
-
+                    $users = User::where('login', $userLogin)->get();
                     $tagData = array();
                     $totalPoints = 0;
-                    foreach ($userTags as $userTag) {
-                        $totalPoints += $userTag->points;
-                        $tagData[$userTag->tag_id] = array('name' => Tag::where('id', $userTag->tag_id)->first()->name, 'points' => $userTag->points, 'badges' => '');
+                    foreach ($users as $user) {
+                        $userTags = UserTag::where('user_id', $user->id)->get();
+                        $userBadges = UserBadge::where('user_id', $user->id)->get();
+
+                        foreach ($userTags as $userTag) {
+                            $totalPoints += $userTag->points;
+                            $tagData[$userTag->tag_id] = array('name' => Tag::where('id', $userTag->tag_id)->first()->name, 'points' => $userTag->points, 'badges' => '');
+                        }
+                        foreach ($userBadges as $userBadge) {
+                            $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->badge;
+                        }
                     }
-                    foreach ($userBadges as $userBadge) {
-                        $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->badge;
+                    if (empty($tagData)) {
+                        return 'Not found.';
                     }
 
                     $lvl = ceil($totalPoints / 10);
