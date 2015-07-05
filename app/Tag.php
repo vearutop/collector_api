@@ -13,7 +13,7 @@ class Tag extends Model
      */
     protected $table = 'tags';
 
-    protected $fillable = array('name', 'issuer_id');
+    protected $fillable = array('name');
 
     //
 }

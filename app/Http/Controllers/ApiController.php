@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 
 use App\Http\Requests;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\DB;
 use Mockery\CountValidator\Exception;
 
 class ApiController extends Controller
@@ -21,6 +22,13 @@ class ApiController extends Controller
 
     const BADGE_KING = 'king';
     const BADGE_ROCKET = 'rocket';
+    const BADGE_PROMOTER = 'promoter';
+    const BADGE_SPARK = 'spark';
+    const BADGE_MISANTHROP = 'misanthrop';
+    const BADGE_FAMOUS = 'famous';
+
+    const TAG_KARMA = 'karma';
+
 
     const ROCKET_TIME = 300;
 
@@ -140,6 +148,91 @@ class ApiController extends Controller
     }
 
 
+    private function checkPromoterMisanthropBadges() {
+        if (!$this->originUser) {
+            return;
+        }
+
+
+        $tag = Tag::where('name', self::TAG_KARMA)->first();
+        if (!$tag) {
+            return;
+        }
+
+        $positive = $negative = 0;
+        $historyTags = UserTagHistory::where('origin_user_id', $this->originUser->id)->get();
+        foreach ($historyTags as $historyTag) {
+            if ($historyTag->points > 0) {
+                $positive += $historyTag->points;
+            }
+            else {
+                $negative += $historyTag->points;
+            }
+        }
+
+        if ($positive > 50) {
+            $userBadge = UserBadge::where('user_id', $this->originUser->id)->where('badge', self::BADGE_PROMOTER)->first();
+            if (!$userBadge) {
+                $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_PROMOTER));
+                $this->userBadgesIssued []= self::BADGE_PROMOTER;
+                $userBadge->save();
+            }
+        }
+
+        if ($negative < -50) {
+            $userBadge = UserBadge::where('user_id', $this->originUser->id)->where('badge', self::BADGE_MISANTHROP)->first();
+            if (!$userBadge) {
+                $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_MISANTHROP));
+                $this->userBadgesIssued []= self::BADGE_MISANTHROP;
+                $userBadge->save();
+            }
+        }
+    }
+
+
+
+    private function checkSparkBadge() {
+        return; // tODO get rid of laravel
+        if (isset($this->userBadges[self::BADGE_SPARK])) {
+            //return;
+        }
+
+        $count = UserTagHistory::select(DB::raw('countc(1) as tag_id'))
+            ->where(DB::raw('created_at > NOW() - INTERVAL 5 MINUTE'), 1)
+            ->get();
+
+        print_r($count[0]['tag_id']);
+        die($count['count']);
+
+        if ($count['count'] >= 5) {
+            $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $this->tag->id, 'badge' => self::BADGE_SPARK));
+            $this->userBadgesIssued []= self::BADGE_SPARK;
+            $userBadge->save();
+        }
+    }
+
+
+    private function checkFamousBadge() {
+        $userBadge = UserBadge::where('user_id', $this->user->id)->where('badge', self::BADGE_FAMOUS)->first();
+        if ($userBadge) {
+            return;
+        }
+
+        $tag = Tag::where('name', self::TAG_KARMA)->first();
+        if (!$tag) {
+            return;
+        }
+
+        $count = UserTagHistory::select(DB::raw('count(distinct origin_user_id) as count'))
+            ->get();
+        if ($count['count'] > 50) {
+            $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_FAMOUS));
+            $this->userBadgesIssued []= self::BADGE_FAMOUS;
+            $userBadge->save();
+        }
+    }
+
+
 
     /** @var  User */
     private $user;
@@ -189,7 +282,9 @@ class ApiController extends Controller
         $this->checkLevelBadge();
         $this->checkRocketBadge();
         $this->checkKingBadge();
-
+        $this->checkPromoterMisanthropBadges();
+        $this->checkSparkBadge();
+        $this->checkFamousBadge();
     }
 
 
@@ -300,12 +395,15 @@ class ApiController extends Controller
         $text = explode(' ', $_REQUEST['text']);
         $points = (int)$text[0];
         $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
-        $tagName = isset($text[2]) ? $text[2] : 'karma';
+        $tagName = isset($text[2]) ? $text[2] : self::TAG_KARMA;
         $userType = 'slack';
 
         try {
             if ($points) {
                 $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin);
+                if ($tagName != self::TAG_KARMA) {
+                    $this->addPoints($userLogin, $userType, self::TAG_KARMA, $points, $originUserLogin);
+                }
                 //$userInfo = file_get_contents('https://slack.com/api/users.info?token=' . $_REQUEST['token'] . '&');
             }
             else {
@@ -354,7 +452,7 @@ class ApiController extends Controller
 
                     $lvl = floor($totalPoints / 10);
 
-                    $report = '@' . $this->getLoginName($user->login) . 'lvl' . $lvl
+                    $report = '@' . $this->getLoginName($user->login) . ' at lvl' . $lvl
                         . ' with ' . $totalPoints . ' is recognized for ' . "\n";
                     foreach ($tagData as $tagId => $tagInfo) {
                         $report .= $tagInfo['name'] . ' with ' . $tagInfo['points'] . ' points '
@@ -367,7 +465,7 @@ class ApiController extends Controller
                     return 'Thank you for curiosity. See you in the library.';
                 }
 
-                elseif ('help' === $text[0]) {
+                elseif ('help' === $text[0] || empty($text[0])) {
                     return '`/hb +1 @username topic` to promote' . "\n"
                     . '`/hb info @username` to get achievements' . "\n"
                     . '`/hb top topic` to get the master of topic';
