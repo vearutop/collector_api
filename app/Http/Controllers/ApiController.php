@@ -473,7 +473,7 @@ class ApiController extends Controller
                         }
                     }
                     if (empty($tagData)) {
-                        return 'Not found.' . $debug;
+                        return 'Not found.'/* . $debug*/;
                     }
 
                     $lvl = ceil($totalPoints / 10);
@@ -492,7 +492,7 @@ class ApiController extends Controller
                             . "\n";
                     }
                     $this->slackResponse($report);
-                    return 'Thank you for curiosity. See you in the library.' . $debug;
+                    return 'Thank you for curiosity. See you in the library.'/* . $debug */;
                 }
 
                 elseif ('help' === $text[0] || empty($text[0])) {
@@ -576,4 +576,13 @@ class ApiController extends Controller
 
     }
 }
+
+
+/**
+ * Sync users_tags table:
+ *
+delete from users_tags;
+insert into users_tags (user_id,tag_id,points,created_at,updated_at) (select user_id,tag_id,sum(points),min(created_at),max(created_at) FROM users_tags_history GROUP BY user_id,tag_id) ON DUPLICATE KEY UPDATE points = VALUES(points), created_at = VALUES(created_at), updated_at = VALUES(updated_at);
+ */
+
 // last line of code
