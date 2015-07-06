@@ -442,26 +442,38 @@ class ApiController extends Controller
                 }
 
                 elseif ('info' === $text[0]) {
+                    $debug = '';
+
+                    $debug = print_r($_REQUEST, 1);
+
                     if (!$userLogin) {
                         $userLogin = $_REQUEST['user_name'];
                     }
                     $users = User::where('login', $userLogin)->get();
+
                     $tagData = array();
                     $totalPoints = 0;
                     foreach ($users as $user) {
+                        $debug .= ' user:' . $user->id . ':' . $user->login . ':' . $user->type . PHP_EOL;
+
                         $userTags = UserTag::where('user_id', $user->id)->get();
                         $userBadges = UserBadge::where('user_id', $user->id)->get();
 
                         foreach ($userTags as $userTag) {
                             $totalPoints += $userTag->points;
+                            $debug .= 'tag:' . $userTag->tag_id . ':' . $userTag->points . PHP_EOL;
                             $tagData[$userTag->tag_id] = array('name' => Tag::where('id', $userTag->tag_id)->first()->name, 'points' => $userTag->points, 'badges' => '');
                         }
                         foreach ($userBadges as $userBadge) {
+                            if (!isset($tagData[$userBadge->tag_id]['badges'])) {
+                                $tagData[$userBadge->tag_id]['badges'] = '';
+                                $debug .= 'tag_id not set:' . $userBadge->tag_id . PHP_EOL;
+                            }
                             $tagData[$userBadge->tag_id]['badges'] .= ' ' . $userBadge->badge;
                         }
                     }
                     if (empty($tagData)) {
-                        return 'Not found.';
+                        return 'Not found.' . $debug;
                     }
 
                     $lvl = ceil($totalPoints / 10);
@@ -476,7 +488,7 @@ class ApiController extends Controller
                             . "\n";
                     }
                     $this->slackResponse($report);
-                    return 'Thank you for curiosity. See you in the library.';
+                    return 'Thank you for curiosity. See you in the library.' . $debug;
                 }
 
                 elseif ('help' === $text[0] || empty($text[0])) {
