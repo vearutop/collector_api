@@ -481,6 +481,10 @@ class ApiController extends Controller
                     $report = '@' . $this->getLoginName($user->login) . ' at lvl' . $lvl
                         . ' with ' . $totalPoints . ' points is recognized for ' . "\n";
                     foreach ($tagData as $tagId => $tagInfo) {
+                        if (!isset($tagInfo['name'])) {
+                            $debug .= "no tag:" . $tagId . PHP_EOL;
+                            continue;
+                        }
                         $report .= $tagInfo['name'] . ' with ' . $tagInfo['points'] . ' points '
                             . ($tagInfo['badges']
                                 ? 'and is rewarded with: ' . str_replace(' ', ', ', trim($tagInfo['badges']))
