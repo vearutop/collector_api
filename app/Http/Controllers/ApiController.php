@@ -442,6 +442,9 @@ class ApiController extends Controller
                 }
 
                 elseif ('info' === $text[0]) {
+                    if (!$userLogin) {
+                        $userLogin = $_REQUEST['user_name'];
+                    }
                     $users = User::where('login', $userLogin)->get();
                     $tagData = array();
                     $totalPoints = 0;
