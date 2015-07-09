@@ -379,12 +379,20 @@ class ApiController extends Controller
     }
 
 
+    private $slackMaxPoints = 100;
+
     public function slack(Request $request)
     {
         try {
             if (isset($_GET['token'])) {
                 $this->slackBotToken = $_GET['token'];
             }
+
+            if (isset($_GET['maxPoints'])) {
+                $this->slackMaxPoints = $_GET['maxPoints'];
+            }
+
+
 
             //file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
             $originUserLogin = $_REQUEST['user_name'];
@@ -407,6 +415,13 @@ class ApiController extends Controller
                 $text[0] = -1;
             }
             $points = (int)$text[0];
+            if ($points > $this->slackMaxPoints) {
+                $points = $this->slackMaxPoints;
+            }
+            elseif ($points < -$this->slackMaxPoints) {
+                $points = -$this->slackMaxPoints;
+            }
+
             $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
             $tagName = isset($text[2]) ? $text[2] : self::TAG_KARMA;
             $userType = 'slack';
