@@ -381,41 +381,43 @@ class ApiController extends Controller
 
     public function slack(Request $request)
     {
-        //file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
-        $originUserLogin = $_REQUEST['user_name'];
-        /**
-         *   [token] => tXCT7j2VkyWJD1nbjgePr3YS
-        [team_id] => T076QNKKQ
-        [team_domain] => hb-acme
-        [channel_id] => C076R0U1Z
-        [channel_name] => general
-        [user_id] => U076QV8L8
-        [user_name] => vearutop
-        [command] => /hb
-        [text] => -1 @mdzor
-         */
-
-        $text = explode(' ', $_REQUEST['text']);
-        if ('+' === $text[0]) {
-            $text[0] = 1;
-        }
-        elseif ('-' === $text[0]) {
-            $text[0] = -1;
-        }
-        $points = (int)$text[0];
-        $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
-        $tagName = isset($text[2]) ? $text[2] : self::TAG_KARMA;
-        $userType = 'slack';
-
         try {
+            if (isset($_GET['token'])) {
+                $this->slackBotToken = $_GET['token'];
+            }
+
+            //file_put_contents('/tmp/slack.log', print_r($_REQUEST,1), FILE_APPEND);
+            $originUserLogin = $_REQUEST['user_name'];
+            /**
+             *   [token] => tXCT7j2VkyWJD1nbjgePr3YS
+             * [team_id] => T076QNKKQ
+             * [team_domain] => hb-acme
+             * [channel_id] => C076R0U1Z
+             * [channel_name] => general
+             * [user_id] => U076QV8L8
+             * [user_name] => vearutop
+             * [command] => /hb
+             * [text] => -1 @mdzor
+             */
+
+            $text = explode(' ', $_REQUEST['text']);
+            if ('+' === $text[0]) {
+                $text[0] = 1;
+            } elseif ('-' === $text[0]) {
+                $text[0] = -1;
+            }
+            $points = (int)$text[0];
+            $userLogin = isset($text[1]) ? substr($text[1], 1) : '';
+            $tagName = isset($text[2]) ? $text[2] : self::TAG_KARMA;
+            $userType = 'slack';
+
             if ($points) {
                 $this->addPoints($userLogin, $userType, $tagName, $points, $originUserLogin);
                 if ($tagName != self::TAG_KARMA) {
                     $this->addPoints($userLogin, $userType, self::TAG_KARMA, $points, $originUserLogin);
                 }
                 //$userInfo = file_get_contents('https://slack.com/api/users.info?token=' . $_REQUEST['token'] . '&');
-            }
-            else {
+            } else {
                 if ('top' === $text[0]) {
                     $tagText = $text[1];
 
@@ -434,14 +436,11 @@ class ApiController extends Controller
                         $this->slackResponse('@' . $this->getLoginName($user->login) . ' is the top about ' . $tagText . ' with ' . $userTag->points . ' points.');
                         return;
                         // for the kaaaarma!
-                    }
-                    else {
+                    } else {
                         return 'oops three';
                     }
 
-                }
-
-                elseif ('info' === $text[0]) {
+                } elseif ('info' === $text[0]) {
                     $debug = '';
 
                     $debug = print_r($_REQUEST, 1);
@@ -473,7 +472,8 @@ class ApiController extends Controller
                         }
                     }
                     if (empty($tagData)) {
-                        return 'Not found.'/* . $debug*/;
+                        return 'Not found.'/* . $debug*/
+                            ;
                     }
 
                     $lvl = ceil($totalPoints / 10);
@@ -492,35 +492,33 @@ class ApiController extends Controller
                             . "\n";
                     }
                     $this->slackResponse($report);
-                    return 'Thank you for curiosity. See you in the library.'/* . $debug */;
-                }
-
-                elseif ('help' === $text[0] || empty($text[0])) {
+                    return 'Thank you for curiosity. See you in the library.'/* . $debug */
+                        ;
+                } elseif ('help' === $text[0] || empty($text[0])) {
                     return '`/hb +1 @username topic` to promote' . "\n"
                     . '`/hb info @username` to get achievements' . "\n"
                     . '`/hb top topic` to get the master of topic';
-                }
-                else {
+                } else {
                     throw new \Exception('Try `/hb help`');
                 }
             }
-        }
-        catch (\Exception $e) {
+        } catch (\Exception $e) {
             return $e->getMessage();
         }
 
-        $this->slackResponse("@".$_REQUEST['user_name'] . " gave $points to @$userLogin for *$tagName*" . "\n" . $this->getMessage());
+        $this->slackResponse("@" . $_REQUEST['user_name'] . " gave $points to @$userLogin for *$tagName*" . "\n" . $this->getMessage());
         return 'Your opinion really matters. Thank you!';
     }
 
 
+    private $slackBotToken = 's3KBEGSbzeKI6maAEFtZEus2';
     private function slackResponse($text) {
         $text = str_replace('rocket', 'rocket :rocket:', $text);
 
         // create a new cURL resource
         $ch = \curl_init();
         \curl_setopt($ch,CURLOPT_POSTFIELDS, $text);
-        $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=s3KBEGSbzeKI6maAEFtZEus2&channel=%23".$_REQUEST['channel_name'] ;
+        $url = "https://". $_REQUEST['team_domain'] .".slack.com/services/hooks/slackbot?token=" . $this->slackBotToken . "&channel=%23".$_REQUEST['channel_name'] ;
         // set URL and other appropriate options
         \curl_setopt($ch, CURLOPT_URL, $url);
         \curl_setopt($ch, CURLOPT_HEADER, 0);
