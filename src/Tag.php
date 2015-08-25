@@ -2,18 +2,26 @@
 
 namespace HackerBadge;
 
+use Yaoi\Database\Definition\Column;
+use Yaoi\Database\Definition\Table;
 use Yaoi\Database\Entity;
 
 class Tag extends Entity
 {
-    /**
-     * The database table used by the model.
-     *
-     * @var string
-     */
-    protected $table = 'tags';
+    public $id;
+    public $name;
 
-    protected $fillable = array('name');
+    static function setUpColumns($columns)
+    {
+        $columns->id = Column::AUTO_ID;
+        $columns->name = Column::create(Column::STRING + Column::NOT_NULL)->setUnique();
+    }
+
+    static function setUpTable(\Yaoi\Database\Definition\Table $table, $columns)
+    {
+        $table->setSchemaName('tags');
+    }
+
 
     //
 }

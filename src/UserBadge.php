@@ -2,19 +2,31 @@
 
 namespace HackerBadge;
 
+use Yaoi\Database\Definition\Column;
+use Yaoi\Database\Definition\Table;
 use Yaoi\Database\Entity;
 
 /**
  * Class UserBadge
  * @package App
- * @property $user_id
- * @property $tag_id
- * @property $badge
  */
 class UserBadge extends Entity
 {
-    //
-    protected $table = 'users_badges';
-    protected $fillable = array('user_id', 'tag_id', 'badge');
+    public $id;
+    public $userId;
+    public $tagId;
+    public $badge;
 
+    static function setUpColumns($columns)
+    {
+        $columns->id = Column::AUTO_ID;
+        $columns->userId = User::columns()->id;
+        $columns->tagId = Tag::columns()->id;
+        $columns->badge = Column::STRING + Column::NOT_NULL;
+    }
+
+    static function setUpTable(\Yaoi\Database\Definition\Table $table, $columns)
+    {
+        $table->setSchemaName('users_badges');
+    }
 }
