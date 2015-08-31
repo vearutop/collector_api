@@ -62,8 +62,10 @@ class Api extends BaseClass
     }
 
     private function getBadges() {
-        $badges = UserBadge::where('tag_id', $this->userTag->tag_id)
-            ->where('user_id', $this->userTag->user_id)->get();
+        $find = new UserBadge();
+        $find->tagId = $this->userTag->tagId;
+        $find->userId = $this->userTag->userId;
+        $badges = UserBadge::find($find)->query()->fetchAll();
 
         /** @var \HackerBadge\UserBadge $badge */
         foreach ($badges as $badge) {
@@ -85,12 +87,10 @@ class Api extends BaseClass
         }
 
         if ($currentLevel && !isset($this->userBadges[$currentLevel])) {
-            $levelBadge = UserBadge::create(
-                array(
-                    'user_id' => $this->userTag->user_id,
-                    'tag_id' => $this->userTag->tag_id,
-                    'badge' => $currentLevel
-                ));
+            $levelBadge = new UserBadge();
+            $levelBadge->userId = $this->userTag->userId;
+            $levelBadge->tagId = $this->userTag->tagId;
+            $levelBadge->badge = $currentLevel;
             $levelBadge->save();
             $this->levelBadge = $levelBadge;
             $this->userBadgesIssued []= $currentLevel;
@@ -106,16 +106,25 @@ class Api extends BaseClass
             return;
         }
 
-        $king = UserTag::where('tag_id', $this->userTag->tag_id)->orderBy('points', 'desc')->first();
+        $find = new UserTag();
+        $find->tagId = $this->userTag->tagId;
+        /** @var UserTag $king */
+        $king = UserTag::find($find)->order('? DESC', UserTag::columns()->points)->query()->fetchRow();
         if ($king->id === $this->userTag->id) {
-            $prevKingBadge = UserBadge::where(array('tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_KING))->first();
+            /** @var UserBadge $prevKingBadge */
+            $prevKingBadge = UserBadge::find()
+                ->where('? = ?', UserBadge::columns()->tagId, $this->userTag->tagId)
+                ->where('? = ?', UserBadge::columns()->badge, self::BADGE_KING)
+                ->query()->fetchRow();
             if ($prevKingBadge) {
                 $prevKingBadge->delete();
             }
 
-            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_KING));
+            $kingBadge = new UserBadge();
+            $kingBadge->userId = $this->userTag->userId;
+            $kingBadge->tagId = $this->userTag->tagId;
+            $kingBadge->badge = self::BADGE_KING;
             $kingBadge->save();
-
 
             $this->userBadgesIssued []= self::BADGE_KING;
         }

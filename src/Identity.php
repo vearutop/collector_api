@@ -7,31 +7,26 @@ use Yaoi\Database\Definition\Index;
 use Yaoi\Database\Definition\Table;
 use Yaoi\Database\Entity;
 
-/**
- * Class UserTag
- * @package App
- */
-class UserTag extends Entity
+class Identity extends Entity
 {
     public $id;
     public $userId;
-    public $tagId;
-    public $points;
+    public $login;
+    public $identityTypeId;
     public $createdAt;
-    public $updatedAt;
 
     static function setUpColumns($columns)
     {
         $columns->id = Column::AUTO_ID;
         $columns->userId = User::columns()->id;
-        $columns->tagId = Tag::columns()->id;
-        $columns->points = Column::INTEGER + Column::NOT_NULL;
-
+        $columns->login = Column::STRING + Column::NOT_NULL;
+        $columns->identityTypeId = IdentityType::columns()->id;
+        $columns->createdAt = Column::INTEGER + Column::NOT_NULL;
     }
 
     static function setUpTable(\Yaoi\Database\Definition\Table $table, $columns)
     {
-        $table->setSchemaName('users_tags');
-        $table->addIndex(Index::TYPE_UNIQUE, $columns->userId, $columns->tagId);
+        $table->addIndex(Index::TYPE_UNIQUE, $columns->login, $columns->identityTypeId);
     }
+
 }
