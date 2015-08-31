@@ -6,6 +6,7 @@ use Yaoi\Database\Definition\Column;
 use Yaoi\Database\Definition\Index;
 use Yaoi\Database\Definition\Table;
 use Yaoi\Database\Entity;
+use Yaoi\Date\TimeMachine;
 
 /**
  * Class UserTag
@@ -19,6 +20,10 @@ class UserTag extends Entity
     public $points;
     public $createdAt;
     public $updatedAt;
+
+    public function __construct() {
+        $this->createdAt = TimeMachine::getInstance()->now();
+    }
 
     static function setUpColumns($columns)
     {
