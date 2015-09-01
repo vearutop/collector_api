@@ -141,9 +141,13 @@ class Api extends BaseClass
         }
 
 
-        $createdUt = strtotime($this->userTag->created_at);
-        $updatedUt = strtotime($this->userTag->updated_at);
+        $createdUt = $this->userTag->createdAt;
+        $updatedUt = $this->userTag->updatedAt;
         if ($updatedUt - $createdUt < self::ROCKET_TIME) {
+            $kingBadge = new UserBadge();
+            $kingBadge->userId = $this->userTag->userId;
+            $kingBadge->tagId = $this->userTag->tagId;
+
             $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_ROCKET));
             $kingBadge->save();
             $this->userBadgesIssued []= self::BADGE_ROCKET;

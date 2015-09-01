@@ -21,10 +21,6 @@ class UserTag extends Entity
     public $createdAt;
     public $updatedAt;
 
-    public function __construct() {
-        $this->createdAt = TimeMachine::getInstance()->now();
-    }
-
     static function setUpColumns($columns)
     {
         $columns->id = Column::AUTO_ID;
@@ -38,5 +34,15 @@ class UserTag extends Entity
     {
         $table->setSchemaName('users_tags');
         $table->addIndex(Index::TYPE_UNIQUE, $columns->userId, $columns->tagId);
+    }
+
+    public function save() {
+        $now = TimeMachine::getInstance()->now();
+        if (null === $this->createdAt) {
+            $this->createdAt = $now;
+        }
+
+        $this->updatedAt = $now;
+        return parent::save();
     }
 }
