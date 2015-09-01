@@ -144,12 +144,11 @@ class Api extends BaseClass
         $createdUt = $this->userTag->createdAt;
         $updatedUt = $this->userTag->updatedAt;
         if ($updatedUt - $createdUt < self::ROCKET_TIME) {
-            $kingBadge = new UserBadge();
-            $kingBadge->userId = $this->userTag->userId;
-            $kingBadge->tagId = $this->userTag->tagId;
-
-            $kingBadge = UserBadge::create(array('user_id' => $this->userTag->user_id, 'tag_id' => $this->userTag->tag_id, 'badge' => self::BADGE_ROCKET));
-            $kingBadge->save();
+            $rocketBadge = new UserBadge();
+            $rocketBadge->userId = $this->userTag->userId;
+            $rocketBadge->tagId = $this->userTag->tagId;
+            $rocketBadge->badge = self::BADGE_ROCKET;
+            $rocketBadge->save();
             $this->userBadgesIssued []= self::BADGE_ROCKET;
         }
 
@@ -162,13 +161,14 @@ class Api extends BaseClass
         }
 
 
-        $tag = Tag::where('name', self::TAG_KARMA)->first();
+        /** @var Tag $tag */
+        $tag = Tag::find()->where('? = ?', Tag::columns()->name, self::TAG_KARMA)->query()->fetchRow();
         if (!$tag) {
             return;
         }
 
         $positive = $negative = 0;
-        $historyTags = UserTagHistory::where('origin_user_id', $this->originUser->id)->get();
+        $historyTags = UserTagHistory::find()->where(UserTagHistory::columns()->originUserId, $this->originUser->id)->query();
         foreach ($historyTags as $historyTag) {
             if ($historyTag->points > 0) {
                 $positive += $historyTag->points;
@@ -178,7 +178,13 @@ class Api extends BaseClass
             }
         }
 
+        // TODO continue
         if ($positive > 50) {
+            $userBadge = new UserBadge();
+            $userBadge->userId = $this->originUser->id;
+            $userBadge->tagId = $tag->id;
+            $userBadge->badge = self::BADGE_PROMOTER;
+            $userBadge = UserBadge::find($userBadge)->where(UserBadge::columns()->userId);
             $userBadge = UserBadge::where('user_id', $this->originUser->id)->where('badge', self::BADGE_PROMOTER)->first();
             if (!$userBadge) {
                 $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_PROMOTER));
