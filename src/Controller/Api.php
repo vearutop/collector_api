@@ -7,6 +7,7 @@ use HackerBadge\User;
 use HackerBadge\UserBadge;
 use HackerBadge\UserTag;
 use HackerBadge\UserTagHistory;
+use Yaoi\App;
 use Yaoi\BaseClass;
 
 class Api extends BaseClass
@@ -65,7 +66,7 @@ class Api extends BaseClass
         $find = new UserBadge();
         $find->tagId = $this->userTag->tagId;
         $find->userId = $this->userTag->userId;
-        $badges = UserBadge::find($find)->query()->fetchAll();
+        $badges = UserBadge::statement($find)->query()->fetchAll();
 
         /** @var \HackerBadge\UserBadge $badge */
         foreach ($badges as $badge) {
@@ -109,10 +110,10 @@ class Api extends BaseClass
         $find = new UserTag();
         $find->tagId = $this->userTag->tagId;
         /** @var UserTag $king */
-        $king = UserTag::find($find)->order('? DESC', UserTag::columns()->points)->query()->fetchRow();
+        $king = UserTag::statement($find)->order('? DESC', UserTag::columns()->points)->query()->fetchRow();
         if ($king->id === $this->userTag->id) {
             /** @var UserBadge $prevKingBadge */
-            $prevKingBadge = UserBadge::find()
+            $prevKingBadge = UserBadge::statement()
                 ->where('? = ?', UserBadge::columns()->tagId, $this->userTag->tagId)
                 ->where('? = ?', UserBadge::columns()->badge, self::BADGE_KING)
                 ->query()->fetchRow();
@@ -162,13 +163,15 @@ class Api extends BaseClass
 
 
         /** @var Tag $tag */
-        $tag = Tag::find()->where('? = ?', Tag::columns()->name, self::TAG_KARMA)->query()->fetchRow();
+        $tag = Tag::statement()->where('? = ?', Tag::columns()->name, self::TAG_KARMA)->query()->fetchRow();
         if (!$tag) {
             return;
         }
 
         $positive = $negative = 0;
-        $historyTags = UserTagHistory::find()->where(UserTagHistory::columns()->originUserId, $this->originUser->id)->query();
+        $historyTags = UserTagHistory::statement()
+            ->where(UserTagHistory::columns()->originUserId, $this->originUser->id)
+            ->query();
         foreach ($historyTags as $historyTag) {
             if ($historyTag->points > 0) {
                 $positive += $historyTag->points;
@@ -178,27 +181,28 @@ class Api extends BaseClass
             }
         }
 
-        // TODO continue
+
         if ($positive > 50) {
             $userBadge = new UserBadge();
             $userBadge->userId = $this->originUser->id;
             $userBadge->tagId = $tag->id;
             $userBadge->badge = self::BADGE_PROMOTER;
-            $userBadge = UserBadge::find($userBadge)->where(UserBadge::columns()->userId);
-            $userBadge = UserBadge::where('user_id', $this->originUser->id)->where('badge', self::BADGE_PROMOTER)->first();
-            if (!$userBadge) {
-                $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_PROMOTER));
-                $this->userBadgesIssued []= self::BADGE_PROMOTER;
+
+            if (!UserBadge::statement($userBadge)->query()->fetchRow()) {
                 $userBadge->save();
+                $this->userBadgesIssued []= $userBadge->badge;
             }
         }
 
         if ($negative < -50) {
-            $userBadge = UserBadge::where('user_id', $this->originUser->id)->where('badge', self::BADGE_MISANTHROP)->first();
-            if (!$userBadge) {
-                $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $tag->id, 'badge' => self::BADGE_MISANTHROP));
-                $this->userBadgesIssued []= self::BADGE_MISANTHROP;
+            $userBadge = new UserBadge();
+            $userBadge->userId = $this->originUser->id;
+            $userBadge->tagId = $tag->id;
+            $userBadge->badge = self::BADGE_MISANTHROP;
+
+            if (!UserBadge::statement($userBadge)->query()->fetchRow()) {
                 $userBadge->save();
+                $this->userBadgesIssued []= $userBadge->badge;
             }
         }
     }
@@ -206,27 +210,33 @@ class Api extends BaseClass
 
 
     private function checkSparkBadge() {
-        return; // tODO get rid of laravel
         if (isset($this->userBadges[self::BADGE_SPARK])) {
-            //return;
+            return;
         }
 
-        $count = UserTagHistory::select(DB::raw('countc(1) as tag_id'))
-            ->where(DB::raw('created_at > NOW() - INTERVAL 5 MINUTE'), 1)
-            ->get();
-
-        print_r($count[0]['tag_id']);
-        die($count['count']);
+        $find = new UserTagHistory();
+        $find->userId = $this->user->id;
+        $find->tagId = $this->tag->id;
+        $count = UserTagHistory::statement($find)
+            ->select('count(1) AS c')
+            ->where('? > ?', UserTagHistory::columns()->createdAt, App::time()->now() - 300)
+            ->query()
+            ->fetchRow('c');
 
         if ($count['count'] >= 5) {
-            $userBadge = UserBadge::create(array('user_id' => $this->originUser->id, 'tag_id' => $this->tag->id, 'badge' => self::BADGE_SPARK));
-            $this->userBadgesIssued []= self::BADGE_SPARK;
+            $userBadge = new UserBadge();
+            $userBadge->userId = $this->user->id;
+            $userBadge->tagId = $this->tag->id;
+            $userBadge->badge = self::BADGE_SPARK;
+            $this->userBadgesIssued []= $userBadge->badge;
             $userBadge->save();
         }
     }
 
-
+// todo continue
     private function checkFamousBadge() {
+        $find = new UserBadge();
+
         $userBadge = UserBadge::where('user_id', $this->user->id)->where('badge', self::BADGE_FAMOUS)->first();
         if ($userBadge) {
             return;

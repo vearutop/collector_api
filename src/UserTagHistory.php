@@ -2,21 +2,17 @@
 
 namespace HackerBadge;
 
-use Illuminate\Database\Eloquent\Model;
 use Yaoi\Database\Definition\Column;
-use Yaoi\Database\Definition\Table;
 use Yaoi\Database\Entity;
 
 class UserTagHistory extends Entity
 {
-    protected $table = 'users_tags_history';
-    protected $fillable = array('user_id', 'tag_id', 'points', 'origin_user_id');
-
     public $id;
     public $userId;
     public $tagId;
     public $points;
     public $originUserId;
+    public $createdAt;
 
     //
     static function setUpColumns($columns)
@@ -26,6 +22,7 @@ class UserTagHistory extends Entity
         $columns->tagId = Tag::columns()->id;
         $columns->points = Column::INTEGER + Column::NOT_NULL;
         $columns->originUserId = User::columns()->id;
+        $columns->createdAt = Column::INTEGER;
     }
 
     static function setUpTable(\Yaoi\Database\Definition\Table $table, $columns)
